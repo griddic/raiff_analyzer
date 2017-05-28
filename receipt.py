@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from pandas import DataFrame
+from pandas import DataFrame, to_numeric
 
 DEBIT = "Debit"
 CREDIT = "Credit"
@@ -80,6 +80,7 @@ class Receipt:
     @classmethod
     def read_from_folder(cls, path_to_folder):
         files = [os.path.join(path_to_folder, file) for file in os.listdir(path_to_folder)]
+        files = sorted(files)
         receipts = list(map(Receipt.read_receipt_from_file, files))
         receipt = receipts[0]
         for other_receipt in receipts[1:]:
@@ -87,7 +88,10 @@ class Receipt:
         return receipt
 
     def to_DF(self):
-        return DataFrame(self.data, columns=self.columns)
+        df = DataFrame(self.data, columns=self.columns)
+        df[CREDIT] = df[CREDIT].apply(to_numeric)
+        df[DEBIT] = df[DEBIT].apply(to_numeric)
+        return df
 
 
 if __name__ == "__main__":
